@@ -1,0 +1,4 @@
+.env
+.vscode/launch.json
+dist/
+node_modules/
