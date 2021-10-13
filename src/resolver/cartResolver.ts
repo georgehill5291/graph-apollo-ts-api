@@ -93,7 +93,6 @@ export class CartResolver {
     }
 
     @Query((_return) => GetCardByUserMutationResponse)
-    @UseMiddleware(CheckAuth)
     async getCartByUser(@Ctx() { req }: CustomContext): Promise<GetCardByUserMutationResponse> {
         try {
             const carts = await CartModel.find({ userId: req.session.userId }).populate(
