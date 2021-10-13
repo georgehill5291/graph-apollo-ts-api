@@ -29,12 +29,13 @@ const main = async () => {
 
     app.set('trust proxy', 1)
 
-    app.use(
-        cors({
-            origin: __prod__ ? process.env.CORS_ORIGIN_PROD : process.env.CORS_ORIGIN_DEV,
-            credentials: true,
-        })
-    )
+    // app.use(
+    //     cors({
+    //         origin: __prod__ ? process.env.CORS_ORIGIN_PROD : process.env.CORS_ORIGIN_DEV,
+    //         credentials: true,
+    //     })
+    // )
+    app.use(cors())
 
     const mongoUrl = process.env.MONGODB
     await mongoose.connect(mongoUrl, {
