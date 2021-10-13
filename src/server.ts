@@ -16,6 +16,10 @@ import { CartResolver } from './resolver/cartResolver'
 import cors from 'cors'
 import { StripeResolver } from './resolver/stripeResolver'
 import { OrderResolver } from './resolver/orderResolver'
+import {
+    ApolloServerPluginLandingPageLocalDefault,
+    ApolloServerPluginLandingPageProductionDefault,
+} from 'apollo-server-core/dist/plugin/landingPage/default'
 
 const dotenv = require('dotenv').config()
 
@@ -75,7 +79,11 @@ const main = async () => {
             // connection,
             dataLoaders: buildDataLoaders(),
         }),
-        plugins: [ApolloServerPluginLandingPageGraphQLPlayground],
+        // plugins: [ApolloServerPluginLandingPageGraphQLPlayground()],
+        plugins:
+            process.env.ENV_IS_PROD === 'production'
+                ? [ApolloServerPluginLandingPageProductionDefault({ footer: false })]
+                : [ApolloServerPluginLandingPageGraphQLPlayground],
     })
 
     await apolloServer.start()
