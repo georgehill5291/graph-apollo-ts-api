@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+    ecommerce-be-image:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: ecommerce-be-container
+        ports:
+            - '4004:4004'
