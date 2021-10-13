@@ -32,7 +32,7 @@ const main = async () => {
         })
     )
 
-    const mongoUrl = `mongodb+srv://george:dev123@graphapollo.olsc0.mongodb.net/test`
+    const mongoUrl = process.env.MONGODB
     await mongoose.connect(mongoUrl, {
         useCreateIndex: true,
         useNewUrlParser: true,
