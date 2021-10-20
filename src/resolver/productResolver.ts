@@ -14,7 +14,7 @@ export class ProductResolver {
         @Arg('size', (_type) => String, { nullable: true }) size: string,
         @Arg('sort', (_type) => String, { nullable: true }) sort: string,
         @Arg('limit', (_type) => Int) limit: number,
-        @Arg('offset', { nullable: true }) offset?: number
+        @Arg('offset', (_type) => Int, { nullable: true }) offset?: number
     ): Promise<PaginatedProducts | null> {
         try {
             let query = {} as any
@@ -76,8 +76,8 @@ export class ProductResolver {
 
     @Mutation((_return) => ProductMutaionReponse)
     @UseMiddleware(CheckAdminAuth)
-    async updatePost(
-        @Arg('updatePostInput') { id, title, desc, img, price }: UpdateProductInput
+    async updateProduct(
+        @Arg('updateProductInput') { id, title, desc, img, price }: UpdateProductInput
     ): Promise<ProductMutaionReponse> {
         try {
             const existingProduct = await ProductModel.findOne({ _id: id })
@@ -115,5 +115,12 @@ export class ProductResolver {
     async product(@Arg('id', (_type) => String) id: string): Promise<Product | undefined> {
         const product = await ProductModel.findOne({ _id: id })
         return product
+    }
+
+    @Mutation((_return) => Boolean)
+    @UseMiddleware(CheckAdminAuth)
+    async deleteProduct(@Arg('id', (_type) => String) id: string): Promise<boolean> {
+        const deleteUser = await ProductModel.findOneAndDelete({ _id: id })
+        return true
     }
 }

@@ -35,7 +35,6 @@ const main = async () => {
     //         credentials: true,
     //     })
     // )
-    app.use(cors())
 
     const mongoUrl = process.env.MONGODB
     await mongoose.connect(mongoUrl, {
@@ -89,7 +88,11 @@ const main = async () => {
 
     await apolloServer.start()
 
-    apolloServer.applyMiddleware({ app, cors: false })
+    var corsOptions = {
+        origin: true,
+        credentials: true,
+    }
+    apolloServer.applyMiddleware({ app, cors: corsOptions })
 
     app.get('/', (req, res) => {
         res.send('Hello George')

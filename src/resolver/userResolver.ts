@@ -1,4 +1,4 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { User, UserModel } from '../models/User'
 import argon2 from 'argon2'
 import { RegisterInput } from '../types/user/RegisterInput'
@@ -8,6 +8,7 @@ import { CustomContext } from '../types/shared/CustomContext'
 import { LoginInput } from '../types/user/LoginInput'
 import { COOKIE_NAME } from '../ultilities/constant'
 import mongoose from 'mongoose'
+import { CheckAdminAuth } from '../middleware/checkAuth'
 
 @Resolver((_of) => UserModel)
 export class UserResolver {
@@ -46,7 +47,7 @@ export class UserResolver {
                     message: 'Duplicated username or email',
                     error: [
                         {
-                            field: existingUser.username === username ? 'username' : 'Email',
+                            field: existingUser.username === username ? 'username' : 'email',
                             message: `${
                                 existingUser.username === username ? 'Username' : 'Email'
                             } already taken`,
@@ -160,11 +161,27 @@ export class UserResolver {
         })
     }
 
+    @Mutation((_return) => Boolean)
+    @UseMiddleware(CheckAdminAuth)
+    async deleteUserById(@Arg('id', (_type) => String) id: string): Promise<boolean> {
+        const deleteUser = await UserModel.findOneAndDelete({ _id: id })
+        return true
+    }
+
     @Query((_return) => User, { nullable: true })
     async me(@Ctx() { req }: CustomContext): Promise<User | undefined | null> {
         if (!req.session.userId) return null
 
         const user = await UserModel.findOne({ _id: req.session.userId })
         return user
+    }
+
+    @Query((_return) => [User], { nullable: true })
+    @UseMiddleware(CheckAdminAuth)
+    async getAllUser(@Ctx() { req }: CustomContext): Promise<User[] | undefined | null> {
+        if (!req.session.userId) return null
+
+        const users = await UserModel.find()
+        return users
     }
 }
