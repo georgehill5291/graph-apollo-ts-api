@@ -20,6 +20,9 @@ import {
     ApolloServerPluginLandingPageLocalDefault,
     ApolloServerPluginLandingPageProductionDefault,
 } from 'apollo-server-core/dist/plugin/landingPage/default'
+const {
+    graphqlUploadExpress, // A Koa implementation is also exported.
+} = require('graphql-upload')
 
 const dotenv = require('dotenv').config()
 
@@ -60,6 +63,8 @@ const main = async () => {
             resave: false,
         })
     )
+
+    app.use(graphqlUploadExpress())
 
     const apolloServer = new ApolloServer({
         schema: await buildSchema({

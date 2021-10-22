@@ -6,6 +6,11 @@ import { PaginatedProducts } from '../types/product/PaginatedProducts'
 import { ProductMutaionReponse } from '../types/product/ProductMutaionReponse'
 import { UpdateProductInput } from '../types/product/UpdateProductInput'
 import { CustomContext } from '../types/shared/CustomContext'
+import { GraphQLUpload, FileUpload } from 'graphql-upload'
+import { Upload } from '../types/shared/Upload'
+import { handleFileUpload } from '../awss3/productImageUpload'
+import { Stream } from 'stream'
+const { productImage } = require('../awss3/productImageUpload')
 
 export class ProductResolver {
     @Query((_return) => PaginatedProducts, { nullable: true })
@@ -47,13 +52,16 @@ export class ProductResolver {
     @UseMiddleware(CheckAdminAuth)
     async createProduct(
         @Arg('createProductInput') { title, desc, img, price }: CreateProductInput,
+        @Arg('productImage', () => GraphQLUpload) file: FileUpload,
         @Ctx() { req }: CustomContext
     ): Promise<ProductMutaionReponse> {
         try {
+            const response = await handleFileUpload(file)
+
             let newProduct = new ProductModel({
                 title,
                 desc,
-                img,
+                img: (response as any)?.Location,
                 price,
             })
             newProduct = await newProduct.save()
@@ -122,5 +130,17 @@ export class ProductResolver {
     async deleteProduct(@Arg('id', (_type) => String) id: string): Promise<boolean> {
         const deleteUser = await ProductModel.findOneAndDelete({ _id: id })
         return true
+    }
+
+    @Mutation((_return) => Boolean)
+    async uploadImage(@Arg('productImage', () => GraphQLUpload) file: any): Promise<boolean> {
+        try {
+            const response = await handleFileUpload(file)
+
+            return true
+        } catch (error) {
+            console.log(error)
+            return false
+        }
     }
 }
