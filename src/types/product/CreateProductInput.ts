@@ -13,4 +13,13 @@ export class CreateProductInput {
 
     @Field()
     price: string
+
+    @Field((_return) => [String])
+    size: string[]
+
+    @Field((_return) => [String])
+    color: string[]
+
+    @Field((_return) => [String])
+    categories: string[]
 }

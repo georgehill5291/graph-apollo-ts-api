@@ -51,19 +51,27 @@ export class ProductResolver {
     @Mutation((_return) => ProductMutaionReponse)
     @UseMiddleware(CheckAdminAuth)
     async createProduct(
-        @Arg('createProductInput') { title, desc, img, price }: CreateProductInput,
-        @Arg('productImage', () => GraphQLUpload) file: FileUpload,
+        @Arg('createProductInput')
+        { title, desc, img, price, size, color, categories }: CreateProductInput,
+        @Arg('productImage', () => GraphQLUpload, { nullable: true }) file: FileUpload,
         @Ctx() { req }: CustomContext
     ): Promise<ProductMutaionReponse> {
         try {
-            const response = await handleFileUpload(file)
-
             let newProduct = new ProductModel({
                 title,
                 desc,
-                img: (response as any)?.Location,
+                img,
                 price,
+                size,
+                color,
+                categories,
             })
+
+            if (file) {
+                const productImage = await handleFileUpload(file)
+                newProduct.img = (productImage as any)?.Location
+            }
+
             newProduct = await newProduct.save()
 
             return {
@@ -85,7 +93,9 @@ export class ProductResolver {
     @Mutation((_return) => ProductMutaionReponse)
     @UseMiddleware(CheckAdminAuth)
     async updateProduct(
-        @Arg('updateProductInput') { id, title, desc, img, price }: UpdateProductInput
+        @Arg('updateProductInput')
+        { id, title, desc, img, price, size, color, categories }: UpdateProductInput,
+        @Arg('productImage', () => GraphQLUpload, { nullable: true }) file: FileUpload
     ): Promise<ProductMutaionReponse> {
         try {
             const existingProduct = await ProductModel.findOne({ _id: id })
@@ -99,8 +109,15 @@ export class ProductResolver {
 
             existingProduct.title = title
             existingProduct.desc = desc
-            existingProduct.img = img
             existingProduct.price = price
+            existingProduct.size = size
+            existingProduct.color = color
+            existingProduct.categories = categories
+
+            if (file) {
+                const productImage = await handleFileUpload(file)
+                existingProduct.img = (productImage as any)?.Location
+            }
 
             await existingProduct.save()
 

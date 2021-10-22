@@ -16,4 +16,13 @@ export class UpdateProductInput {
 
     @Field()
     price: number
+
+    @Field((_return) => [String])
+    size: string[]
+
+    @Field((_return) => [String])
+    color: string[]
+
+    @Field((_return) => [String])
+    categories: string[]
 }
