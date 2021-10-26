@@ -1,8 +1,11 @@
-import { prop, getModelForClass, modelOptions, Severity } from '@typegoose/typegoose'
+import { prop, getModelForClass, modelOptions, Severity, plugin } from '@typegoose/typegoose'
 import mongoose from 'mongoose'
 import { Field, ID, ObjectType } from 'type-graphql'
+import { FilterQuery, PaginateOptions, PaginateResult } from 'mongoose-paginate-v2'
+const mongoosePaginate = require('mongoose-paginate-v2')
 
 @ObjectType()
+@plugin(mongoosePaginate)
 @modelOptions({ options: { allowMixed: Severity.ALLOW } })
 export class User {
     @Field((_type) => ID)
@@ -30,6 +33,14 @@ export class User {
 
     @Field()
     updatedAt: Date
+
+    static paginate: PaginateMethod<User>
 }
+
+type PaginateMethod<T> = (
+    query?: FilterQuery<T>,
+    options?: PaginateOptions,
+    callback?: (err: any, result: PaginateResult<T>) => void
+) => Promise<PaginateResult<T>>
 
 export const UserModel = getModelForClass(User)

@@ -178,10 +178,22 @@ export class UserResolver {
 
     @Query((_return) => [User], { nullable: true })
     @UseMiddleware(CheckAdminAuth)
-    async getAllUser(@Ctx() { req }: CustomContext): Promise<User[] | undefined | null> {
+    async getAllUser(
+        @Arg('email', (_type) => String, { nullable: true }) email: string,
+        @Ctx() { req }: CustomContext
+    ): Promise<User[] | undefined | null> {
         if (!req.session.userId) return null
 
-        const users = await UserModel.find()
-        return users
+        let query = {} as any
+        if (email) query.email = { $regex: email }
+
+        var options = {
+            sort: { createdAt: -1 },
+            offset: 0,
+            limit: 10,
+        }
+
+        const users = await UserModel.paginate(query, options)
+        return users.docs
     }
 }

@@ -15,6 +15,7 @@ const { productImage } = require('../awss3/productImageUpload')
 export class ProductResolver {
     @Query((_return) => PaginatedProducts, { nullable: true })
     async products(
+        @Arg('productName', (_type) => String, { nullable: true }) productName: string,
         @Arg('color', (_type) => String, { nullable: true }) color: string,
         @Arg('size', (_type) => String, { nullable: true }) size: string,
         @Arg('sort', (_type) => String, { nullable: true }) sort: string,
@@ -24,6 +25,7 @@ export class ProductResolver {
         try {
             let query = {} as any
 
+            if (productName) query.title = { $regex: productName }
             if (color) query.color = { $in: color.split(',') }
             if (size) query.size = { $in: size.split(',') }
 
